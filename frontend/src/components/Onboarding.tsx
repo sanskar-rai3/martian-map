@@ -23,6 +23,18 @@ const DIALOGUE2: { gif: string }[] = [
 
 type Phase = "title" | "black0" | "slide1" | "dialogue" | "black1" | "slide2" | "black2" | "dialogue2" | "black3" | "slide3" | "black4" | "slide4" | "fadeout";
 
+// "Skip intro" path: only the image slides with black in between.
+const SKIP_NEXT: Partial<Record<Phase, Phase>> = {
+  black0: "slide1",
+  slide1: "black1",
+  black1: "slide2",
+  slide2: "black3",
+  black3: "slide3",
+  slide3: "black4",
+  black4: "slide4",
+  slide4: "fadeout",
+};
+
 const NEXT: Record<Phase, Phase> = {
   title:     "black0",
   black0:    "slide1",
@@ -45,6 +57,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
   const [fadeOut, setFadeOut] = useState(false);
   const [lineIndex, setLineIndex] = useState(0);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const [skipped, setSkipped] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playCountRef = useRef(0);
 
@@ -94,11 +107,6 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
     }
   }, [phase, lineIndex, currentDialogue.length]);
 
-  // reset lineIndex when entering a dialogue phase
-  useEffect(() => {
-    if (phase === "dialogue" || phase === "dialogue2") setLineIndex(0);
-  }, [phase]);
-
   // keyboard
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -121,15 +129,23 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
 
   // auto-advance timed phases
   useEffect(() => {
-    if (phase === "dialogue" || phase === "dialogue2" || phase === "title" || phase === "fadeout" || phase === "black0" || phase === "slide1") return;
+    if (phase === "fadeout") return;
+    if (!skipped && (phase === "dialogue" || phase === "dialogue2" || phase === "title" || phase === "black0" || phase === "slide1")) return;
     const dur = phase.startsWith("black") ? BLACK_DURATION : SLIDE_DURATION;
     const t = setTimeout(() => {
-      const next = NEXT[phase];
+      const next = skipped ? SKIP_NEXT[phase] ?? "fadeout" : NEXT[phase];
       if (next === "fadeout") { setFadeOut(true); setTimeout(onDone, 1000); }
       else setPhase(next);
     }, dur);
     return () => clearTimeout(t);
-  }, [phase, onDone]);
+  }, [phase, onDone, skipped]);
+
+  const skipIntro = () => {
+    audioRef.current?.pause();
+    setSkipped(true);
+    setLineIndex(0);
+    setPhase("black0");
+  };
 
   const handleUnlock = () => {
     if (phase === "black0") { setPhase("slide1"); return; }
@@ -184,7 +200,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
       )}
 
       {/* Click anywhere to continue — shown on slide1 before dialogue */}
-      {(phase === "black0" || phase === "slide1") && (
+      {!skipped && (phase === "black0" || phase === "slide1") && (
         <div onClick={handleUnlock} style={{
           position: "absolute", inset: 0, zIndex: 10, cursor: "pointer",
           display: "flex", alignItems: "flex-end", justifyContent: "center",
@@ -196,6 +212,23 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
             animation: "blink 1.2s ease-in-out infinite",
           }}>CLICK ANYWHERE TO CONTINUE</p>
         </div>
+      )}
+
+      {/* Skip intro */}
+      {!skipped && !fadeOut && (
+        <button
+          type="button"
+          onClick={skipIntro}
+          style={{
+            position: "absolute", top: 20, right: 20, zIndex: 20,
+            background: "rgba(0,0,0,0.5)", color: "white",
+            border: "1px solid rgba(255,255,255,0.6)", borderRadius: 6,
+            padding: "6px 14px", fontSize: "0.85rem",
+            fontFamily: "MainFont, Arial, sans-serif",
+          }}
+        >
+          Skip intro
+        </button>
       )}
 
       {/* Dialogue phases */}

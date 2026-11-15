@@ -67,26 +67,26 @@ export default function LocationDialogue({
         onClick={advance}
         style={{
           position: "absolute", left: "50%", bottom: "5%", transform: "translateX(-50%)",
-          width: "min(720px, 60%)", minHeight: 130,
+          width: "min(860px, 65%)", minHeight: 160,
           background: "rgba(10, 10, 14, 0.85)", border: "2px solid rgba(255,255,255,0.85)",
-          borderRadius: 10, padding: "26px 28px 22px", color: "white",
+          borderRadius: 10, padding: "32px 32px 28px", color: "white",
           pointerEvents: "auto", cursor: "pointer",
         }}
       >
         {/* Name tag */}
         <div
           style={{
-            position: "absolute", top: -16, left: 20,
+            position: "absolute", top: -20, left: 20,
             background: "white", color: "black", padding: "3px 12px",
-            borderRadius: 6, fontSize: "0.85rem",
+            borderRadius: 6, fontSize: "1.15rem",
           }}
         >
           {title}
         </div>
 
-        <p style={{ margin: 0, fontSize: "1.05rem", lineHeight: 1.5 }}>{line.slice(0, shown)}</p>
+        <p style={{ margin: 0, fontSize: "1.5rem", lineHeight: 1.45 }}>{line.slice(0, shown)}</p>
 
-        <div style={{ position: "absolute", right: 14, bottom: 8, fontSize: "0.7rem", opacity: 0.6 }}>
+        <div style={{ position: "absolute", right: 14, bottom: 8, fontSize: "0.9rem", opacity: 0.6 }}>
           {index + 1}/{lines.length}{" "}
           {!typing && <span style={{ animation: "dlgBlink 1s infinite" }}>▼</span>}
         </div>

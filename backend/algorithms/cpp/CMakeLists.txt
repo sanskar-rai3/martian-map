@@ -7,6 +7,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+
+execute_process(
+    COMMAND ${Python_EXECUTABLE} -m pybind11 --cmakedir
+    OUTPUT_VARIABLE pybind11_DIR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+)
+
 find_package(pybind11 CONFIG REQUIRED)
 
 pybind11_add_module(
