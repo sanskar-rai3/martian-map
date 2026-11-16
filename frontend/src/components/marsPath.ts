@@ -1,6 +1,6 @@
 import * as Cesium from "cesium";
 
-const API_URL = process.env.NEXT_PUBLIC_MARS_API_URL ?? "http://localhost:4000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 const PATH_ENTITY_ID = "mars-walking-path";
 
 type Place = string | { latitude: number; longitude: number };
